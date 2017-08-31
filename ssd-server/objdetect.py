@@ -1,6 +1,5 @@
 import os, sys, argparse
 from dd_client import DD
-import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--image",help="path to image")
