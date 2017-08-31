@@ -1,0 +1,55 @@
+item {
+  name: "none_of_the_above"
+  label: 0
+  display_name: "background"
+}
+item {
+  name: "autotruck"
+  label: 1
+  display_name: "autotruck"
+}
+item {
+  name: "crane"
+  label: 2
+  display_name: "crane"
+}
+item {
+  name: "digger"
+  label: 3
+  display_name: "digger"
+}
+item {
+  name: "mixerTruck"
+  label: 4
+  display_name: "mixerTruck"
+}
+item {
+  name: "forklift"
+  label: 5
+  display_name: "forklift"
+}
+item {
+  name: "colorPlate"
+  label: 6
+  display_name: "colorPlate"
+}
+item {
+  name: "pit"
+  label: 7
+  display_name: "pit"
+}
+item {
+  name: "bricksPile"
+  label: 8
+  display_name: "bricksPile"
+}
+item {
+  name: "mound"
+  label: 9
+  display_name: "mound"
+}
+item {
+  name: "worker"
+  label: 10
+  display_name: "worker"
+}
