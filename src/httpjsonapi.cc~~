@@ -36,10 +36,9 @@
 #include <boost/iostreams/copy.hpp>
 #include <chrono>
 #include <ctime>
-//#include <string>
-//#include <vector>
+#include <string>
 #include "common.h"
-//#include "svm/src/svm_own.h"
+#include "svm/svmpredict.h"
 
 DEFINE_string(host,"localhost","host for running the server");
 DEFINE_string(port,"8080","server port");
@@ -284,9 +283,9 @@ public:
             assert(predictions.IsObject());
             Value& classesreply = predictions["classes"];
             Value& uridata = predictions["uri"];
-            item.AddMember("name",uridata,allocator);
             if (classesreply.IsArray())
             {
+                item.AddMember("name",uridata,allocator);
                 for (size_t i = 0; i < classesreply.Size(); ++i)  
                 {                 
                     Value & v = classesreply[i];  
@@ -314,7 +313,6 @@ public:
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     output_arry.Accept(writer);
     stranswer = buffer.GetString();
-
     return; 
   } 
   
@@ -325,7 +323,7 @@ public:
     d.SetObject();
     doc.Parse<0>(stranswer.c_str());
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
-    
+    svmloadmodel();
     Value item(rapidjson::kArrayType);
     classesName strua[11];
     strua[0].className = "background1";
@@ -339,46 +337,85 @@ public:
     strua[8].className = "bricksPile";
     strua[9].className = "mound";
     strua[10].className = "worker1";
-    //preResult strua1[11];
-   
-    dd::CSVM svm;
-    //加载模型
-    
-    std::string sPathModel= "/home/yangmiao/test/deepdetect-svm/src/svm/model/att_2_10_20170904_sec";
-    //dd::CSVM::CSVM();
-    int nNum = 10;
-    vector<double> vdConf[nNum];
-    if (svm.load_model(sPathModel) < 0)
-    {
-        return;
-    }
+    preResult strua1[11];
 
-    for (int i = 0; i < doc.Size(); ++i)
+    for (size_t i = 0; i < doc.Size(); ++i)  
     {   
         Value output_obj(rapidjson::kObjectType);
         Value& num = doc[i];
         Value& uridata = num["name"];
-        
         for (Value::ConstMemberIterator itr = num.MemberBegin();itr != num.MemberEnd(); ++itr)
         {
-            for (int i = 1;i < 11;i++)
+            for (int i = 0;i < 11;i++)
             {
                 if (itr->name.GetString() == strua[i].className)
                 {
-                    vdConf[i-1].push_back(atof(itr->value.GetString()));
+                    strua1[i].prob.push_back(atof(itr->value.GetString()));
                 }
             }
-        } 
-        
-        double dConf = svm.predict(vdConf, nNum);
+        }
+
+        int nNum = 10;
+        vector<double> vdConf[nNum];
+        for (int i = 1;i < 11;i++)
+        {
+            if (!strua1[i].prob.empty())
+            {
+                vdConf[i-1] = strua1[i].prob;
+            }
+        }
+        double preResultData = svmpredict::svmresult(vdConf,nNum);
         output_obj.AddMember("name",uridata,allocator);
-        output_obj.AddMember("predict", dConf, allocator);
-        item.PushBack(output_obj,allocator);
+        output_obj.AddMember("predict", preResultData, allocator);
+        item.PushBack(output_obj,allocator)
+        /*
+        if (count > 1)
+        {
+            double maxprob = 0;
+            for (int i = 0;i < 11;i++)
+            {
+                if (!strua1[i].prob.empty())
+                {
+                    std::vector<double>::iterator biggest = std::max_element(std::begin(strua1[i].prob), std::end(strua1[i].prob));
+                    if(*biggest>maxprob)
+                    {
+                    maxprob = *biggest;
+                    }
+                }
+            }
+            output_obj.AddMember("name",uridata,allocator);
+            output_obj.AddMember("predict", maxprob, allocator);
+        }
+        else
+        {
+            double minprob = 1.0;
+            for (int i = 0;i < 11;i++)
+            {
+                if ((strua1[i].prob).size() > 0)
+                {
+                    std::vector<double>::iterator minist = std::min_element(std::begin(strua1[i].prob), std::end(strua1[i].prob));
+                    if (*minist < minprob)
+                    {
+                        minprob = *minist;
+                    }                           
+                }
+            }
+        
+            if(minprob > 0.5)
+            {
+                minprob = round((1.0- minprob)*1e3)/1e3;
+            }
+            output_obj.AddMember("name",uridata,allocator);
+            output_obj.AddMember("predict", minprob, allocator);
+        }
+        item.PushBack(output_obj,allocator);*/
     }
+    
     rapidjson::StringBuffer buffer;      
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     item.Accept(writer);
     stranswer = buffer.GetString();
+    
     return; 
   }
   

@@ -111,6 +111,10 @@ find_package(OpenCV REQUIRED)
 set(OPENCV_VERSION ${OpenCV_VERSION_MAJOR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 message(STATUS "OpenCV ${OPENCV_VERSION} (${OpenCV_VERSION}) found (${OpenCV_CONFIG_PATH})")
+# add svm opencv lib
+#add_executable(deepdetect ${PROJECT_SOURCE_DIR}/src/httpjsonapu.cc  ${PROJECT_SOURCE_DIR}/src/svm/src/svm_own.cpp)
+# Link your application with OpenCV libraries
+link_libraries(${OpenCV_LIBS})
 
 # customized Caffe as external project
 if (CAFFE_INC_DIR AND CAFFE_LIB_DIR)
